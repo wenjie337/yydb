@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fw.yydb.mapper.AttendedMapper">
+	<resultMap id="result" type="com.fw.yydb.entiy.AttendedDto">
+		<result property="productID" column="PRODUCT_ID" />
+		<result property="activityId" column="ACTIVITY_ID" />
+		<result property="involvementCode" column="INVOLVEMENT_CODE" />
+		<result property="userID" column="USER_ID" />
+		<result property="isPrize" column="IS_PRIZE" />
+		<result property="createTime" column="CREATE_TIME" />
+	</resultMap>
+	<resultMap type="com.fw.yydb.entiy.JoinRecord" id="resultMap">
+    	<result property="userID" column="USER_ID"/>
+		<result property="productId" column="PRODUCT_ID"/>
+		<result property="productName" column="PRODUCT_NAME"/>
+		<result property="productTitle" column="PRODUCT_TITLE"/>
+		<result property="peopleCount" column="PEOPLE_COUNT"/>
+		<result property="periodsId" column="PERIODS_ID"/>
+		<result property="periodsCode" column="PERIODS_CODE"/>
+		<result property="userCount" column="USERCOUNT"/>
+		<result property="periodsStatus" column="PERIODSSTATUS"/>
+		<result property="winStatus" column="WIN_STATUS"/>
+		<result property="winName" column="WINNAME"/>
+		<result property="winUserID" column="WINUSERID"/>
+		<result property="winJoinCount" column="WINJOINCOUNT"/>
+		<result property="isMeWin" column="ISMEWIN"/>
+	</resultMap>
+	
+	<insert id="addAttended">
+		INSERT INTO T_ATTENDED
+		(PRODUCT_ID,ACTIVITY_ID,INVOLVEMENT_CODE,USER_ID,CREATE_TIME,NICK_NAME)
+		<foreach collection="numberList" item="item" index="index" open="(" close=")" separator="union all">
+			
+			SELECT #{productId},#{activityId},#{item},#{userId},systimestamp,#{nickName} FROM DUAL
+		</foreach>
+	</insert>
+
+	<update id="updatePrize" >
+		UPDATE T_ATTENDED SET
+		IS_PRIZE=1 where ACTIVITY_ID=#{activityId} and
+		INVOLVEMENT_CODE=#{involvementCode}
+	</update>
+
+	<select id="queryListByActivityId" resultMap="result">
+		SELECT PRODUCT_ID,ACTIVITY_ID,INVOLVEMENT_CODE,USER_ID,CREATE_TIME
+		FROM T_ATTENDED
+		WHERE ACTIVITY_ID=#{activityId} and PRODUCT_ID=#{productId}
+		<if test='startTime !=null and startTime != ""'>
+			and INVOLVEMENT_CODE=#{involvementCode}
+		</if>
+	</select>
+	
+	  <select id="queryCurrUserNums" resultType="int" parameterType="java.util.HashMap">
+		  select involvement_code 
+		  from t_attended t 
+		  where t.user_id=#{userID} 
+		  and t.ACTIVITY_ID=#{activityId}
+	  </select>
+	  
+	  
+	<select id="queryJoinRecord" resultMap="resultMap" parameterType="java.util.HashMap">
+		
+	</select>
+	
+	
+	<select id="myJoinRecord" resultMap="resultMap" parameterType="java.util.HashMap">
+		SELECT
+			a.*, ta.activity_code
+		FROM
+			(
+				SELECT
+					user_id,
+					activity_id,
+					product_id,
+					count(1) userCount,
+					max(t.create_time)
+				FROM
+					t_attended t
+				WHERE
+					t.user_id = #{userId}
+				GROUP BY
+					t.user_id,
+					activity_id,
+					product_id
+				ORDER BY
+					max(t.create_time)
+				LIMIT #{startRows},#{endRows}
+			) a
+		LEFT JOIN t_activity ta ON a.activity_id = ta.activity_id
+		LEFT JOIN t_lottery tl ON a.activity_id = tl.activity_id
+	</select>
+</mapper>

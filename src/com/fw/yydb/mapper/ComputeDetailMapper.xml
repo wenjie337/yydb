@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fw.yydb.mapper.ComputeDetailMapper">
+
+	<resultMap type="com.fw.yydb.entiy.ComputeDetail" id="resultMap">
+    	<result property="numberA" column="NUMBER_A_COUNT"/>
+		<result property="numberB" column="PRIZE_CODE"/>
+		<result property="lotteryCode" column="LOTTERY_CODE"/>
+		<result property="luckNum" column="PRIZE_NUMBER"/>
+	</resultMap>
+	
+	<select id="queryComputeDetail" resultMap="resultMap">
+		select NUMBER_A_COUNT,PRIZE_CODE,LOTTERY_CODE,c.PRIZE_NUMBER 
+		from (select t.number_a_count,a.prize_code,t.lottery_code,t.periods_id 
+		      from t_periods t left join t_always a on t.lottery_code=a.lottery_code
+		      where t.periods_id=#{periodsID}) d 
+		left join t_lottery c on  c.periods_id=d.periods_id 
+	</select>
+
+
+</mapper>  

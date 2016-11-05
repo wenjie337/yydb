@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fw.yydb.mapper.ActivityMapper">
+	<resultMap id="result" type="com.fw.yydb.entiy.ActivityDto">
+		<result property="activityId" column="ACTIVITY_ID" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="activityCode" column="ACTIVITY_CODE" />
+		<result property="productName" column="PRODUCT_NAME"/>
+		<result property="price" column="PRICE" />
+		<result property="peopleCount" column="PEOPLE_COUNT" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="startTime" column="START_TIME" />
+		<result property="fullTime" column="FULL_TIME" />
+		<result property="endTime" column="END_TIME" />
+		<result property="lotteryTime" column="LOTTERY_TIME" />
+		<result property="lotteryCode" column="LOTTERY_CODE" />
+		<result property="status" column="STATUS" />
+		<result property="bannerImg" column="banner_img" />
+		<result property="detailImg" column="detail_img" />
+		<result property="maxCount" column="max_count" />
+	</resultMap>
+
+
+	<resultMap type="com.fw.yydb.entiy.ActivityProductDetail" id="detailResultMap">
+    	<result property="productId" column="PRODUCT_ID"/>
+		<result property="activityID" column="ACTIVITY_ID"/>
+		<result property="productName" column="PRODUCT_NAME"/>
+		<result property="productTitle" column="PRODUCT_TITLE"/>
+		<result property="productDesc" column="PRODUCT_DESC"/>
+		<result property="activityCode" column="activity_CODE"/>
+		<result property="activityStatus" column="activitySTATUS"/>
+		<result property="peopleCount" column="PEOPLE_COUNT"/>
+		<result property="price" column="PRICE"/>
+		<result property="winName" column="NICK_NAME"/>
+		<result property="winUserID" column="WINUSERID"/>
+		<result property="winJoinCount" column="WINJOINCOUNT"/>
+		<result property="luckNum" column="PRIZE_NUMBER"/>
+		<result property="lotteryTime" column="LOTTERY_TIME"/>
+	</resultMap>
+
+	<select id="queryList" resultMap="result">
+		SELECT
+			ta.*, tp.product_name,tp.banner_img,tp.detail_img,tp.max_count
+		FROM
+			T_ACTIVITY ta,
+			t_product tp
+		WHERE
+			ta.product_id = tp.product_id 
+		<if test="productId != null">
+			and tp.PRODUCT_ID in (${productId})
+		</if>
+		and ta.STATUS=#{status} limit #{startRows},#{endRows}
+	</select>
+	
+	
+	<select id="queryActivity" resultMap="result">
+		SELECT
+			ta.*, tp.product_name,tp.banner_img,tp.detail_img
+		<if test='userId != null and userId !=""'>
+			,(select count(*) from t_attended td where td.user_id = #{userId} and td.activity_id = ta.activity_id ) as currUserJoinNum
+		</if>
+		FROM
+			T_ACTIVITY ta,
+			t_product tp
+		WHERE
+			ta.product_id = tp.product_id 
+		<if test="productId != null">
+			and tp.PRODUCT_ID =#{productId}
+		</if>
+		<if test="activityId != null">
+			and ta.activity_ID=#{activityId}
+		</if>
+		<if test="status != null">
+			and tp.STATUS=#{status}
+		</if>
+	</select>
+	
+	
+	<update id="updateActivity">
+		UPDATE T_Activity SET
+			STATUS=#{status}
+		<if test='startTime !=null and startTime != ""'>
+			,START_TIME=date_formate(#{startTime},'yyyy-mm-dd hh:mm:ss')
+		</if>
+		<if test='lotteryTime !=null and lotteryTime != ""'>
+			,LOTTERY_TIME=date_formate(#{lotteryTime},'yyyy-mm-dd hh:mm:ss')
+		</if>
+		<if test='fullTime !=null and fullTime != ""'>
+			,full_time=date_formate(#{fullTime},'yyyy-mm-dd hh:mm:ss')
+		</if>
+		<if test='lotteryCode !=null and lotteryCode != ""'>
+			,LOTTERY_CODE=#{lotteryCode}
+		</if>
+		<if test='numberAcount !=null and numberAcount != ""'>
+			,NUMBER_A_COUNT=#{numberAcount}
+		</if>
+		WHERE activity_Id=#{activityId}
+	</update>
+	
+	
+	<select id="queryListByStatus" resultMap="result">
+		SELECT ACTIVITY_ID,t.PRODUCT_ID,ACTIVITY_CODE,p.STATUS,LOTTERY_TIME,START_TIME,FULL_TIME,PEOPLE_COUNT
+		FROM T_ACTIVITY p,T_PRODUCT t
+		WHERE p.PRODUCT_ID= t.PRODUCT_ID
+		AND p.STATUS=#{status}
+	</select>
+	
+	
+	<insert id="addActivity">
+		INSERT INTO T_ACTIVITY	(PRODUCT_ID,ACTIVITY_CODE)
+		VALUES(#{productId},#{activityCode})
+	</insert>
+	
+	
+	<select id="findLottery" resultMap="result">
+		SELECT
+			t.activity_id,
+			t.product_id,
+			t.activity_code,
+			t. STATUS,
+			t.lottery_time,
+			t.start_time,
+			t1.product_name,
+			t.full_time,
+			t.lottery_code,
+			t.number_a_count,
+			t.PEOPLE_COUNT
+		FROM
+			t_activity t,
+			t_PRODUCT t1
+		WHERE
+			t.PRODUCT_ID = t1.PRODUCT_ID
+		AND t. STATUS = 3
+		ORDER BY
+			t.full_time
+	</select>
+</mapper>  

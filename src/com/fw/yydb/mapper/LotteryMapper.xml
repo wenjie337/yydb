@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fw.yydb.mapper.LotteryMapper">
+	<resultMap id="result" type="com.fw.yydb.entiy.LotteryDto">
+		<result property="lotteryID" column="LOTTERY_ID" />
+		<result property="userID" column="USER_ID" />
+		<result property="periodsID" column="PERIODS_ID" />
+		<result property="productID" column="PRODUCT_ID" />
+		<result property="productName" column="PRODUCT_NAME" />
+		<result property="periodsCode" column="PERIODS_CODE" />
+		<result property="prizeNumber" column="PRIZE_NUMBER" />
+		<result property="lotteryTime" column="LOTTERY_TIME" />
+		<result property="status" column="STATUS" />
+	</resultMap>
+	<insert id="addLottery" >
+		insert into t_lottery
+		(LOTTERY_ID,USER_ID,PERIODS_ID,PRODUCT_ID,PRODUCT_NAME,PERIODS_CODE,prize_number)
+		values(SEQ_LOTTERY.NEXTVAL,#{userID},#{periodsID},#{productID},#{productName},#{periodsCode},#{prizeNumber})
+	</insert>
+</mapper>  

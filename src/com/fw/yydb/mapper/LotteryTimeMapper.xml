@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fw.yydb.mapper.LotteryTimeMapper">
+	<resultMap id="result" type="com.fw.yydb.entiy.LotteryTimeDto">
+		<result property="id" column="ID" />
+		<result property="periodsCode" column="PERIODS_CODE" />
+		<result property="lotteryTime" column="LOTTERY_TIME" />
+	</resultMap>
+	<select id="findlotteryTime" parameterType="String"
+		resultType="com.fw.yydb.entiy.LotteryTimeDto">
+		select t.id,t.PERIODS_CODE,t.LOTTERY_TIME from
+		t_lottery_time t where t.lottery_time>#{lotteryTime} order by lottery_time
+	</select>
+</mapper>  

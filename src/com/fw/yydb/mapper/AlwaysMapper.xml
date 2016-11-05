@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fw.yydb.mapper.AlwaysMapper">
+	<resultMap id="result" type="com.fw.yydb.entiy.AlwaysMapperDto">
+		<result property="id" column="ID" />
+		<result property="lotteryCode" column="LOTTERY_CODE" />
+		<result property="prizeCode" column="PRIZE_CODE" />
+		<result property="lotteryTime" column="LOTTERY_TIME" />
+		<result property="source" column="SOURCE" />
+	</resultMap>
+
+	<select id="getMaxByPeriods" resultMap="result" parameterType="long">
+		SELECT * FROM (select
+		t.id,t.LOTTERY_CODE,t.prize_code,t.lottery_time,t.source from t_always
+		t where t.LOTTERY_CODE>#{lotteryCode} order by LOTTERY_CODE desc)
+		WHERE ROWNUM &lt; 2
+	</select>
+
+	<select id="getActivity" resultMap="result" parameterType="long">
+		select
+		t.id,t.LOTTERY_CODE,t.prize_code,t.lottery_time,t.source from t_always
+		t where t.LOTTERY_CODE=#{lotteryCode}
+	</select>
+
+	<select id="countByPeriods" parameterType="long" resultType="long">
+		select
+		count(1) from t_always t where t.LOTTERY_CODE>#{lotteryCode}
+	</select>
+
+	<insert id="addAlways" >
+		insert into t_always(ID,
+		LOTTERY_CODE,PRIZE_CODE,SOURCE)
+		values(SEQ_ALWAYS.NEXTVAL
+		,#{lotteryCode},#{prizeCode},#{source})
+	</insert>
+</mapper>  

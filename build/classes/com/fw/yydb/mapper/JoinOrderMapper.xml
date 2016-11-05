@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fw.yydb.mapper.JoinOrderMapper">
+
+	<resultMap type="com.fw.yydb.entiy.JoinOrder" id="resultMap">
+    	<result property="participateCount" column="PARTICIPATECOUNT"/>
+		<result property="userId" column="USER_ID"/>
+		<result property="nickName" column="NICK_NAME"/>
+		<result property="participateTime" column="CREATE_TIME"/>
+	</resultMap>
+	
+	<select id="queryTopList" resultMap="resultMap" parameterType="java.util.HashMap">
+		select * 
+		from (select count(1) PARTICIPATECOUNT,t.USER_ID,t.NICK_NAME,t.CREATE_TIME 
+				from T_ATTENDED t 
+				where t.PERIODS_ID=#{periodsID} 
+				group by t.USER_ID,NICK_NAME,CREATE_TIME
+				order by t.CREATE_TIME desc)
+		where rownum &lt;= #{rows}
+	</select>
+
+	
+	<select id="queryFlipPage" resultMap="resultMap" parameterType="java.util.HashMap">
+       	select PARTICIPATECOUNT, USER_ID,NICK_NAME,CREATE_TIME
+         from (select PARTICIPATECOUNT, USER_ID,NICK_NAME,CREATE_TIME,rownum rm  
+              from (select count(1) PARTICIPATECOUNT,t.USER_ID,t.NICK_NAME,t.CREATE_TIME 
+					from T_ATTENDED t 
+					where t.PERIODS_ID=#{periodsID} 
+				    and CREATE_TIME &lt;= to_date(#{queryTime}, 'yyyy-mm-dd hh24:mi:ss')
+					group by t.USER_ID,NICK_NAME,CREATE_TIME
+					order by t.CREATE_TIME desc) 
+			  where rownum &lt;= #{max}) 
+         where rm &gt; #{min}
+	</select>
+
+</mapper>  

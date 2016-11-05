@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fw.yydb.mapper.NumberAMapper">
+	<resultMap id="result" type="com.fw.yydb.entiy.NumberADto">
+		<result property="productID" column="PRODUCT_ID" />
+		<result property="periodsID" column="PERIODS_ID" />
+		<result property="userID" column="USER_ID" />
+		<result property="periodsCode" column="PERIODS_CODE" />
+		<result property="nickName" column="NICK_NAME" />
+		<result property="createTime" column="CREATE_TIME" />
+	</resultMap>
+	
+	<resultMap type="com.fw.yydb.entiy.NumberA" id="resultMap">
+    	<result property="userID" column="USER_ID"/>
+		<result property="timeNumber" column="SUB_TIME"/>
+		<result property="nickName" column="NICK_NAME"/>
+		<result property="createTime" column="CREATE_TIME"/>
+	</resultMap>
+	
+	<insert id="addNumberATop" >
+		insert into t_number_a	(product_id,periods_id,user_id,nick_name,create_time,sub_time )
+		<foreach collection="list" item="item" index="index" open="(" close=")" separator="union all">
+			SELECT #{item.productId},#{item.periodsId},#{item.userId},#{item.nickName},#{item.createTime},#{item.subTime} FROM DUAL
+		</foreach>
+	</insert>
+	
+	<select id="queryNumberA" resultMap="resultMap">
+		select USER_ID,NICK_NAME,CREATE_TIME,SUB_TIME 
+		from t_number_a t 
+		where t.periods_id=#{periodsID}
+	</select>
+</mapper>  

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fw.yydb.mapper.PeriodsMapper">
+	<resultMap id="result" type="com.fw.yydb.entiy.PeriodsDto">
+		<result property="periodsID" column="PERIODS_ID" />
+		<result property="productID" column="PRODUCT_ID" />
+		<result property="periodsCode" column="PERIODS_CODE" />
+		<result property="status" column="STATUS" />
+		<result property="lotteryTime" column="LOTTERY_TIME" />
+		<result property="startTime" column="START_TIME" />
+		<result property="fullTime" column="FULL_TIME" />
+		<result property="peopleCount" column="PEOPLE_COUNT" />
+		<result property="lotteryCode" column="LOTTERY_CODE" />
+		<result property="numberAcount" column="NUMBER_A_COUNT" />
+	</resultMap>
+
+	<select id="queryListByStatus" resultMap="result">
+		SELECT
+		PERIODS_ID,t.PRODUCT_ID,PERIODS_CODE,p.STATUS,LOTTERY_TIME,START_TIME,FULL_TIME,PEOPLE_COUNT
+		FROM T_PERIODS p,T_PRODUCT t
+		WHERE p.PRODUCT_ID= t.PRODUCT_ID
+		AND
+		p.STATUS=#{status}
+	</select>
+
+	<select id="queryPeriods" resultMap="result">
+		select PERIODS_ID,p.PRODUCT_ID,PERIODS_CODE,PEOPLE_COUNT
+		from T_PERIODS
+		p,t_PRODUCT t
+		where t.PRODUCT_ID=p.PRODUCT_ID
+		<if test="productId != null">
+			and p.PRODUCT_ID=#{productId}
+		</if>
+		<if test="periodsId != null">
+			and p.PERIODS_ID=#{periodsId}
+		</if>
+		<if test="status != null">
+			and p.STATUS=#{status}
+		</if>
+	</select>
+
+	<update id="updatePeriod">
+		UPDATE T_PERIODS SET
+		STATUS=#{status}
+		<if test='startTime !=null and startTime != ""'>
+			,START_TIME=date_formate(#{startTime},'yyyy-mm-dd hh24:mi:ss')
+		</if>
+		<if test='lotteryTime !=null and lotteryTime != ""'>
+			,LOTTERY_TIME=date_formate(#{lotteryTime},'yyyy-mm-dd
+			hh24:mi:ss')
+		</if>
+		<if test='fullTime !=null and fullTime != ""'>
+			,full_time=date_formate(#{fullTime},'yyyy-mm-dd hh24:mi:ss')
+		</if>
+		<if test='lotteryCode !=null and lotteryCode != ""'>
+			,LOTTERY_CODE=#{lotteryCode}
+		</if>
+		<if test='numberAcount !=null and numberAcount != ""'>
+			,NUMBER_A_COUNT=#{numberAcount}
+		</if>
+		WHERE PERIODS_ID=#{periodsId}
+	</update>
+
+
+	<insert id="addPeriod">
+		INSERT INTO T_PERIODS
+		(PERIODS_ID,PRODUCT_ID,PERIODS_CODE)
+		VALUES(SEQ_PERIODS.NEXTVAL,#{productId},#{periodsCode})
+	</insert>
+
+	<select id="findLottery" resultMap="result">
+		select
+		t.periods_id,t.product_id,t.periods_code,t.status,t.lottery_time,t.start_time,t1.product_name,t.full_time,t.lottery_code,t.number_a_count,PEOPLE_COUNT
+		from t_periods t,t_PRODUCT t1 where t.PRODUCT_ID=t1.PRODUCT_ID and
+		t.status=3 and rownum&lt;5 order by t.full_time
+	</select>
+
+
+</mapper>  

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fw.yydb.mapper.CartMapper">
+	<resultMap id="result" type="com.fw.yydb.entiy.CartDto">
+		<result property="cartId" column="cart_id" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="user_id" column="USER_ID" />
+		<result property="amount" column="AMOUNT" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="price" column="price" />
+	</resultMap>
+
+
+
+	<insert id="addCart">
+		insert into t_cart (product_id,amount,user_id,create_time,price) values(#{productId},#{amount},#{userId},now(),#{price})
+	</insert>
+	
+	
+	<update id="updateCart" >
+		update t_cart set amount=#{amount} where user_id=#{userId} and product_id=#{productId}
+	</update>
+
+
+	<delete id="deleteCart">
+	  	delete from t_cart where user_id=#{userId} and product_id=#{productId}
+  	</delete>
+  	
+  	<delete id="clearCart">
+	  	delete from t_cart where user_id=#{userId}
+  	</delete>
+  
+  	<select id="queryCart" resultMap="result">
+  		select * from t_cart where user_id=#{userId}
+  	</select>
+  
+	
+	
+	
+</mapper>  

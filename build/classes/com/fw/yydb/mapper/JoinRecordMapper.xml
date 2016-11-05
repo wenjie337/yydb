@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fw.yydb.mapper.JoinRecordMapper">
+
+	<resultMap type="com.fw.yydb.entiy.JoinRecord" id="resultMap">
+    	<result property="userID" column="USER_ID"/>
+		<result property="productId" column="PRODUCT_ID"/>
+		<result property="productName" column="PRODUCT_NAME"/>
+		<result property="productTitle" column="PRODUCT_TITLE"/>
+		<result property="peopleCount" column="PEOPLE_COUNT"/>
+		<result property="periodsId" column="PERIODS_ID"/>
+		<result property="periodsCode" column="PERIODS_CODE"/>
+		<result property="userCount" column="USERCOUNT"/>
+		<result property="periodsStatus" column="PERIODSSTATUS"/>
+		<result property="winStatus" column="WIN_STATUS"/>
+		<result property="winName" column="WINNAME"/>
+		<result property="winUserID" column="WINUSERID"/>
+		<result property="winJoinCount" column="WINJOINCOUNT"/>
+		<result property="isMeWin" column="ISMEWIN"/>
+	</resultMap>
+
+	<select id="queryTopList" resultMap="resultMap" parameterType="java.util.HashMap">
+		select USER_ID, 
+	       PRODUCT_ID,
+	       PRODUCT_NAME,
+	       PRODUCT_TITLE,
+	       PEOPLE_COUNT,
+	       PERIODS_ID,
+	       PERIODS_CODE,
+	       USERCOUNT,
+	       PERIODSSTATUS,
+	       WIN_STATUS,
+	       nick_name WINNAME, 
+	       WINUSERID,
+	       case when winUserID is not null then (select count(1) from t_attended where user_id=WINUSERID and periods_id=h.periods_id) 
+	       end WINJOINCOUNT ,
+	       case when winUserID=user_id then 1 else 0 
+	       end ISMEWIN 
+			from 
+			  (select f.user_id,f.product_id,f.product_name,f.product_title,f.people_count,f.periods_id,f.userCount,f.PERIODS_CODE,f.win_Status,f.periodsStatus,f.winUserID,g.nick_name from 
+			    (select e.user_id, e.product_id,e.product_name,e.product_title,e.people_count,e.periods_id,e.userCount,e.PERIODS_CODE,e.periodsStatus,d.status win_Status,d.user_id winUserID from 
+			       (select a.user_id, b.product_id,c.product_name,c.product_title,c.people_count,a.periods_id,a.userCount,b.PERIODS_CODE,b.status periodsStatus from 
+			          (select user_id,periods_id,product_id,count(1) userCount,max(t.create_time)
+			            from t_attended t
+			            where t.user_id=#{userID} 			           
+			            group by t.user_id,periods_id,product_id 
+			            order by max(t.create_time)) a,
+			        t_periods b,
+			        t_Product c
+			        where  a.periods_id=b.periods_id 
+			        and    a.product_id=c.product_id) e 
+			        left join t_lottery d on e.periods_id=d.periods_id) f
+			  left join t_user g 
+			  on f.winUserID=g.user_id) h 
+	</select>
+
+	
+	<select id="queryFlipPage" resultMap="resultMap" parameterType="java.util.HashMap">
+		select USER_ID, 
+		       PRODUCT_ID,
+		       PRODUCT_NAME,
+		       PRODUCT_TITLE,
+		       PEOPLE_COUNT,
+		       PERIODS_ID,
+		       PERIODS_CODE,
+		       USERCOUNT,
+		       PERIODSSTATUS,
+		       WIN_STATUS,
+		       nick_name WINNAME, 
+		       WINUSERID,
+		       case when winUserID is not null then (select count(1) from t_attended where user_id=WINUSERID and periods_id=h.periods_id) end WINJOINCOUNT ,
+		       case when winUserID=user_id then 1
+		            else 0 end ISMEWIN 
+		from (select f.user_id,f.product_id,f.product_name,f.product_title,f.people_count,f.periods_id,f.userCount,f.PERIODS_CODE,f.win_Status,f.periodsStatus,f.winUserID,g.nick_name 
+			from (select e.user_id, e.product_id,e.product_name,e.product_title,e.people_count,e.periods_id,e.userCount,e.PERIODS_CODE,e.periodsStatus,d.status win_Status,d.user_id winUserID 
+				from (select a.user_id, b.product_id,c.product_name,c.product_title,c.people_count,a.periods_id,a.userCount,b.PERIODS_CODE,b.status periodsStatus 
+		       	  from (select user_id,periods_id,product_id,userCount 
+				    from (select user_id,periods_id,product_id,userCount,rownum rm 
+				      from (select user_id,periods_id,product_id,count(1) userCount,max(t.create_time)
+				            from t_attended t
+				            where t.user_id=#{userID} 
+				            and create_time &lt;= to_date(#{queryTime}, 'yyyy-mm-dd hh24:mi:ss') 
+				            group by t.user_id,periods_id,product_id 
+				            order by max(t.create_time)) 
+				      where rownum &lt;= #{max})
+				    where rm &gt; #{min}) a,
+		        t_periods b,
+		        t_Product c
+		        where  a.periods_id=b.periods_id 
+		        and    a.product_id=c.product_id) e 
+		        left join t_lottery d on e.periods_id=d.periods_id) f
+			left join t_user g 
+			on f.winUserID=g.user_id) h
+	</select>
+
+</mapper>  
